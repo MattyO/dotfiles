@@ -1,0 +1,10 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_1='/Users/matt/workspace/rails/rakerunner/app/views/twilio'
+let g:netrw_dirhist_2='/Users/matt/workspace/rails/rakerunner/app/views/rake_files'
+let g:netrw_dirhist_3='/Users/matt/workspace/rails/rakerunner/app/views/rake_tasks'
+let g:netrw_dirhist_4='/Users/matt/workspace/rails/rakerunner/app/assets/javascripts'
+let g:netrw_dirhist_5='/Users/matt/workspace/rails/rakerunner/app/views/overview'
+let g:netrw_dirhist_6='/Users/matt/workspace/rails/rakerunner/app/views/rake_tasks'
+let g:netrw_dirhist_7='/Users/matt/Projects/cwru/cwru-perl-modules/Blackboard'
+let g:netrw_dirhist_8='/Users/matt/Projects/cwru/ech/.git'

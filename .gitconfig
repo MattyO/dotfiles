@@ -1,0 +1,40 @@
+[user]
+	name= Matt ODonnell
+	email=matt.odonnell@leandog.com
+[color]
+	diff=auto
+	status=auto
+	branch=auto
+	interactive=auto
+	ui=auto
+[gc]
+	auto=1
+[merge]
+	summary=true
+[alias]
+	co=checkout
+	ci=commit -v
+	st=status
+	cp=cherry-pick -x
+	rb=rebase
+	pr=pull --rebase
+	br=branch
+	b=branch -v
+	r=remote -v
+	t =tag -l
+	put=push origin HEAD
+	unstage=reset HEAD
+	uncommit=reset --soft HEAD^
+	recommit= commit -C head --amend
+	d =diff
+	c=commit -v
+	s= status
+	dc= diff --cached
+	pr= pull --rebase
+	ar= add -A
+
+	reset-hard=reset --hard origin/master
+
+[git-pair]
+[push]
+	default = matching
