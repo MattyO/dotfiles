@@ -10,7 +10,9 @@ colorscheme gotham
 "colorscheme Mustang
 
 let mapleader=','
-nnoremap <leader>t :!python manage.py test<CR>
+nnoremap <leader>ta :!python manage.py test<CR>
+nnoremap <leader>tt :!python manage.py test <C-r>=substitute('tests/'.expand("%p:h"), "/", ".", "g")<CR><CR>
+nnoremap <leader>tc :vs tests/%:r_test.py
 
 set termguicolors
 
