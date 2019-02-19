@@ -1,19 +1,48 @@
-call pathogen#infect()
+"call pathogen#infect()
 syntax on
 filetype plugin indent on
 
-let &t_Co=256
+"let &t_Co=256
 let &colorcolumn=120
-colorscheme mustang
+let ruby_fold=1
+
+colorscheme gotham
+"colorscheme Mustang
+
+let mapleader=','
+nnoremap <leader>t :!python manage.py test<CR>
+
+set termguicolors
 
 set nocompatible
 set autoread
 
+
 set hidden
 set number
 
+set completeopt=longest,menuone
+function! Tab_Or_Complete()
+    if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
+	return "\<C-n>\<C-r>=pumvisible() ? \"\\<Down>\" : \"\"\<CR>"
+    else
+        return "\<Tab>"
+    endif
+endfunction
+
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+inoremap <expr> <C-n> pumvisible() ? '<C-n>' : '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+inoremap <expr> <M-,> pumvisible() ? '<C-n>' : '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+
+inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
+
+augroup BWCCreateDir
+    autocmd!
+        autocmd BufWritePre * if expand("<afile>")!~#'^\w\+:/' && !isdirectory(expand("%:h")) | execute "silent! !mkdir -p ".shellescape(expand('%:h'), 1) | redraw! | endif
+augroup END
+
 set history=1000
-set undolevels=1000
+set undolevels=10000
 set wildignore=*.swp,*.bak,*.pyc,*.class
 set title
 set visualbell
@@ -57,11 +86,11 @@ au BufRead,BufNewFile *.feature setfiletype ruby
 au BufRead,BufNewFile *.pyx setfiletype python
 au BufRead,BufNewFile *.qml setfiletype qml
 
-autocmd FileType html,htmldjango setlocal expandtab shiftwidth=2 softtabstop=2
-autocmd FileType ruby,cucumber,haml,yaml,lettuce,qml setlocal expandtab shiftwidth=2 softtabstop=2
-autocmd FileType javascript setlocal expandtab shiftwidth=4 softtabstop=4
-autocmd FileType python setlocal expandtab shiftwidth=4 softtabstop=4
-
+autocmd FileType ruby,cucumber,haml,yaml,lettuce,qml,eruby,html,htmldjango setlocal expandtab shiftwidth=2 softtabstop=2 foldlevel=999
+autocmd FileType javascript,python,markdown,css,scss,php setlocal expandtab shiftwidth=4 softtabstop=4
+autocmd FileType javascript setlocal foldlevel=999
+autocmd FileType javascript call JavaScriptFold()
+au BufRead,BufNewFile *.twig set filetype=html
 
 "autocmd FileType python omnifunc=pythoncomplete#Comlete
 "inoremap <C-Space> <C-x><C-o>
@@ -69,7 +98,6 @@ autocmd FileType python setlocal expandtab shiftwidth=4 softtabstop=4
 "autocmd VimEnter * NERDTree
 
 hi Folded ctermbg=None
-set foldlevel=1
 nnoremap <Space> za
 
 function MethodsFirstFolds()
@@ -83,3 +111,6 @@ set foldtext=MethodsFirstFolds()
 highlight ColorColumn ctermbg=235 guibg=#2c2d27
 
 let g:airline_powerline_fonts = 1
+
+"nnoremap <leader>t :w<CR>:!rspec<CR>
+set runtimepath^=~/.vim/bundle/ctrlp.vim
