@@ -10,9 +10,32 @@ colorscheme gotham
 "colorscheme Mustang
 
 let mapleader=','
+
+function! CreateInits()
+	:!touch "tests/__init__.py"
+
+	let fileStructure = []
+	for folder in split(expand("%"), "/")
+		if folder == expand("%:t")
+			break
+		endif
+		call add(fileStructure, folder)
+		silent exec "!touch ". join(fileStructure, "/") . "/__init__.py"
+	endfor
+endfunction
+
+function! GetRightTestFile()
+	if expand("%:t")!~#'test_.*.py'
+		return substitute('tests/'.expand("%:h").'/test_'.expand("%:t:r"), "/", ".", "g")
+	elseif expand("%:t")=~#'.*.py'
+		return substitute(expand("%:h").'/'.expand("%:t:r"), "/", ".", "g")
+	endif
+	return ''
+endfunction
+
 nnoremap <leader>ta :!python manage.py test<CR>
-nnoremap <leader>tt :!python manage.py test <C-r>=substitute('tests/'.expand("%p:h"), "/", ".", "g")<CR><CR>
-nnoremap <leader>tc :vs tests/%:r_test.py
+nnoremap <leader>tt :!python manage.py test <C-r>=GetRightTestFile()<CR><CR>
+nnoremap <leader>tc :vs tests/%:h/test_%:t:r.py<CR>
 
 set termguicolors
 
@@ -41,6 +64,7 @@ inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
 augroup BWCCreateDir
     autocmd!
         autocmd BufWritePre * if expand("<afile>")!~#'^\w\+:/' && !isdirectory(expand("%:h")) | execute "silent! !mkdir -p ".shellescape(expand('%:h'), 1) | redraw! | endif
+        autocmd BufWritePre * if expand("%:t")=~#'test_.*.py' | call CreateInits() | redraw | endif
 augroup END
 
 set history=1000
@@ -90,8 +114,8 @@ au BufRead,BufNewFile *.qml setfiletype qml
 
 autocmd FileType ruby,cucumber,haml,yaml,lettuce,qml,eruby,html,htmldjango setlocal expandtab shiftwidth=2 softtabstop=2 foldlevel=999
 autocmd FileType javascript,python,markdown,css,scss,php setlocal expandtab shiftwidth=4 softtabstop=4
-autocmd FileType javascript setlocal foldlevel=999
-autocmd FileType javascript call JavaScriptFold()
+"autocmd FileType javascript setlocal foldlevel=999
+"autocmd FileType javascript call JavaScriptFold()
 au BufRead,BufNewFile *.twig set filetype=html
 
 "autocmd FileType python omnifunc=pythoncomplete#Comlete
@@ -102,7 +126,7 @@ au BufRead,BufNewFile *.twig set filetype=html
 hi Folded ctermbg=None
 nnoremap <Space> za
 
-function MethodsFirstFolds()
+function! MethodsFirstFolds()
   let line = getline(v:foldstart)
   let num_lines = v:foldend - v:foldstart
   return '+' . v:folddashes . line . "\t[" .num_lines .' lines folded]'
