@@ -11,6 +11,11 @@ colorscheme gotham
 
 let mapleader=','
 
+command! ListAutoAdds echo substitute(system('cd ~/.vim/inserts && find . -type f'), "\\./", "", "g")
+function! InsertThing(selected)
+	silent exec ":r ~/.vim/inserts/" . a:selected
+endfunction
+
 function! CreateInits()
 	:!touch "tests/__init__.py"
 
@@ -36,6 +41,9 @@ endfunction
 nnoremap <leader>ta :!python manage.py test<CR>
 nnoremap <leader>tt :!python manage.py test <C-r>=GetRightTestFile()<CR><CR>
 nnoremap <leader>tc :vs tests/%:h/test_%:t:r.py<CR>
+
+nnoremap <leader>i :call tlib#cmd#BrowseOutputWithCallback('InsertThing','ListAutoAdds')<CR>
+
 
 set termguicolors
 
@@ -140,3 +148,5 @@ let g:airline_powerline_fonts = 1
 
 "nnoremap <leader>t :w<CR>:!rspec<CR>
 set runtimepath^=~/.vim/bundle/ctrlp.vim
+set runtimepath^=~/.vim/bundle/tlib_vim
+let g:tlib#input#filter_mode = 'fuzzy'
