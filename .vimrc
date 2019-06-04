@@ -150,3 +150,11 @@ let g:airline_powerline_fonts = 1
 set runtimepath^=~/.vim/bundle/ctrlp.vim
 set runtimepath^=~/.vim/bundle/tlib_vim
 let g:tlib#input#filter_mode = 'fuzzy'
+
+let g:buffergator_show_full_directory_path=0
+
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 4
+let g:netrw_altv = 1
+let g:netrw_winsize = 25
