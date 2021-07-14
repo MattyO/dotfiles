@@ -1,0 +1,8 @@
+import unittest
+
+class FooTest(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def test_bar(self):
+        self.assertEqual(0,1)
