@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+import shutil
+import os
+
+print("Collecting files...")
+
+current_dir = os.path.dirname(os.path.realpath(__file__))
+with open('config/whitelist-file') as f:
+    for line in f.readlines():
+        dest, src = line.strip().split(" ")
+        dest = os.path.join(current_dir, dest)
+        src = os.path.expanduser(src)
+        print(f"Copying from {src} to {dest}")
+
+        shutil.copy(src, dest)
