@@ -1,13 +1,29 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-
 " let Vundle manage Vundle, required
-Plugin 'ycm-core/YouCompleteMe'"
 Plugin 'VundleVim/Vundle.vim'
+Plugin 'ycm-core/YouCompleteMe'"
+Plugin 'preservim/nerdtree'
+Plugin 'vim-syntastic/syntastic'
+Plugin 'jeetsukumaran/vim-buffergator'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
+"Plugin 'jremmen/vim-ripgrep'
+Plugin 'jiangmiao/auto-pairs'
+Plugin 'airblade/vim-gitgutter.git'
+Plugin 'liuchengxu/vim-better-default'
+Plugin 'leafgarland/typescript-vim'
+Plugin 'MaxMEllon/vim-jsx-pretty'
+Plugin 'Quramy/tsuquyomi'
+Plugin 'w0rp/ale'
+Plugin 'tomtom/tlib_vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -24,7 +40,6 @@ filetype plugin indent on    " required
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
 
-call pathogen#infect()
 syntax on
 filetype plugin indent on
 
@@ -35,46 +50,57 @@ let ruby_fold=1
 "colorscheme gotham
 "colorscheme Mustang
 set background=dark
-colorscheme hybrid_material
-"
+"colorscheme hybrid_material
+colorscheme gotham
+"colorscheme Mustang
+
+
+
+set spell spelllang=en_us
+
 let g:syntastic_python_checkers = ['python']
+let g:syntastic_quiet_messages = { "type": "style" }
+
+"let g:syntastic_always_populate_loc_list = 0
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 0
+let g:syntastic_enable_balloons = 0
+
+let g:ycm_clangd_uses_ycmd_caching = 0
 
 let mapleader=','
 
-command! ListAutoAdds echo substitute(system('cd ~/.vim/inserts && find . -type f'), "\\./", "", "g")
+command! ListAutoAdds echo substitute(system("find ~/.vim/inserts/ -type f | rev | cut -d '/' -f 1-2 | rev"), "\\./", "", "g")
 function! InsertThing(selected)
-	silent exec ":r ~/.vim/inserts/" . a:selected
+    silent exec ":r ~/.vim/inserts/" . a:selected
 endfunction
 
-"function! CreateInits()
-"	:!touch \"tests/__init__.py\"
-"
-"	let fileStructure = []
-"	for folder in split(expand("%"), "/")
-"		if folder == expand("%:t")
-"			break
-"		endif
-"		call add(fileStructure, folder)
-"		silent exec "!touch ". join(fileStructure, "/") . "/__init__.py"
-"	endfor
-"endfunction
 
 function! GetRightTestFile()
-	if expand("%:t")!~#'test_.*.py'
-		return substitute('tests/'.expand("%:h").'/test_'.expand("%:t:r"), "/", ".", "g")
-	elseif expand("%:t")=~#'.*.py'
-		return substitute(expand("%:h").'/'.expand("%:t:r"), "/", ".", "g")
-	endif
-	return ''
+    if expand("%:t")!~#'test_.*.py'
+        return substitute('tests/'.expand("%:h").'/test_'.expand("%:t:r"), "/", ".", "g")
+    elseif expand("%:t")=~#'.*.py'
+        return substitute(expand("%:h").'/'.expand("%:t:r"), "/", ".", "g")
+    endif
+    return ''
 endfunction
+
+let $FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix'
+" --exclude .git
 
 "nnoremap <leader>ta :!python manage.py test<CR>
 "nnoremap <leader>tt :!python manage.py test <C-r>=GetRightTestFile()<CR><CR>
-nnoremap <leader>tn :CreateTemplatedTestFile  <CR>
-nnoremap <leader>ta :RunAllTests  <CR>
-nnoremap <leader>tt :RunsSingleTest  <CR>
-nnoremap <leader>tc :RunCoverage  <CR>
+"
+nnoremap <leader>cf :let @" = expand("%:p")<cr>
+nnoremap <leader>ta :MarkAndSaveTestAll<CR>
+nnoremap <leader>tm :MarkAndSaveTest <CR>
+nnoremap <leader>tt :RunSavedCommand <CR>
+
 nnoremap <leader>j /<cursor><CR>df>i
+nnoremap <leader>tc :RunCoverage  <CR>
+nnoremap <C-P> :FZF<CR>
+nnoremap <silent> <Leader>f :Ag <C-R><C-W><CR>
+
 "nnoremap <leader>ta :!python -m unittest discover tests <CR>
 "nnoremap <leader>tt :!python -m unittest <C-r>=GetRightTestFile()<CR><CR>
 
@@ -99,7 +125,7 @@ set number
 set completeopt=longest,menuone
 function! Tab_Or_Complete()
     if col('.')>1 && strpart( getline('.'), col('.')-2, 3 ) =~ '^\w'
-	return "\<C-n>\<C-r>=pumvisible() ? \"\\<Down>\" : \"\"\<CR>"
+    return "\<C-n>\<C-r>=pumvisible() ? \"\\<Down>\" : \"\"\<CR>"
     else
         return "\<Tab>"
     endif
@@ -112,14 +138,13 @@ inoremap <expr> <M-,> pumvisible() ? '<C-n>' : '<C-x><C-o><C-n><C-p><C-r>=pumvis
 inoremap <Tab> <C-R>=Tab_Or_Complete()<CR>
 
 augroup BWCCreateDir
-    autocmd!
-        autocmd BufWritePre * CreateInits
-	"autocmd BufWritePre * if expand("<afile>")!~#'^\w\+:/' && !isdirectory(expand("%:h")) | execute "silent! !mkdir -p ".shellescape(expand('%:h'), 1) | redraw! | endif
+    "autocmd!
+    "autocmd BufWritePre * if expand("<afile>")!~#'^\w\+:/' && !isdirectory(expand("%:h")) | execute "silent! !mkdir -p ".shellescape(expand('%:h'), 1) | redraw! | endif
 augroup END
 
 set history=1000
 set undolevels=10000
-set wildignore=*.swp,*.bak,*.pyc,*.class
+set wildignore=*.swp,*.bak,*.pyc,*.class ",*/node_modules/*,*DS_Store/*,*git/*,*env/*,db/migrate/*.rb,vendor/*
 set title
 set visualbell
 
@@ -162,10 +187,14 @@ au BufRead,BufNewFile *.feature setfiletype ruby
 au BufRead,BufNewFile *.pyx setfiletype python
 au BufRead,BufNewFile *.qml setfiletype qml
 
-autocmd FileType ruby,cucumber,haml,yaml,lettuce,qml,eruby,html,htmldjango setlocal expandtab shiftwidth=2 softtabstop=2 foldlevel=999
-autocmd FileType javascript,python,markdown,css,scss,php setlocal expandtab shiftwidth=4 softtabstop=4
+au BufWritePre * :%s/\s\+$//e
+
+
+autocmd FileType ruby,cucumber,haml,yaml,lettuce,qml,eruby,html,htmldjango,javascript setlocal expandtab shiftwidth=2 softtabstop=2 foldlevel=999
+autocmd FileType python,markdown,css,scss,php setlocal expandtab shiftwidth=4 softtabstop=4
 "autocmd FileType javascript setlocal foldlevel=999
 "autocmd FileType javascript call JavaScriptFold()
+"autocmd BufWritePre * CreateInits
 au BufRead,BufNewFile *.twig set filetype=html
 
 "autocmd FileType python omnifunc=pythoncomplete#Comlete
@@ -206,3 +235,29 @@ let g:netrw_winsize = 25
 
 
 let g:gitgutter_realtime=1
+
+"t
+"runtime! plugin/default.vim
+"set norelativenumber
+"
+"function! PInsert2(item)
+"	let @z=a:item
+"	norm "zp
+"	call feedkeys('a')
+"endfunction
+"
+"function! CompleteInf()
+"	let nl=[]
+"	let l=complete_info()
+"	for k in l['items']
+"		call add(nl, k['word']. ' : ' .k['info'] . ' '. k['menu'] )
+"	endfor
+"	call fzf#vim#complete(fzf#wrap({ 'source': nl,'reducer': { lines -> split(lines[0], '\zs :')[0] },'sink':function('PInsert2')}))
+"endfunction
+"
+"imap <c-'> <CMD>:call CompleteInf()<CR>
+"
+"set statusline+=%#warningmsg#
+"
+runtime! plugin/default.vim
+set norelativenumber
