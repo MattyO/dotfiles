@@ -1,4 +1,4 @@
-#!/home/matty/bin/programs/last-commit/env/bin/python
+#!/home/matty/workspace/dotfiles/programs/env/bin/python
 
 import datetime
 import arrow
