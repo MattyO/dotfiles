@@ -1,0 +1,15 @@
+#!/home/matty/bin/programs/last-commit/env/bin/python
+
+import datetime
+import arrow
+from pathlib import Path
+
+if not Path("/home/matty/.last-git-commit").is_file():
+    print("NA")
+    exit()
+
+
+with open("/home/matty/.last-git-commit", 'r') as f:
+    last_commit_string = f.read().strip()
+    print(arrow.get(last_commit_string).humanize())
+
