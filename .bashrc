@@ -1,5 +1,4 @@
-# ~/.bashrc: executed by bash(1) for non-login shells.
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# ~/.bashrc: executed by bash(1) for non-login shells.  # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
 # If not running interactively, don't do anything
@@ -47,19 +46,24 @@ esac
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
+    # We have color support; assume it's compliant with Ecma-48
+    # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+    # a case would tend to support setf rather than setaf.)
+    color_prompt=yes
     else
-	color_prompt=
+    color_prompt=
     fi
 fi
 
+parse_git_branch() {
+     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+export PS1="\u@\h \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
+
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\[\033[33m\]\$(parse_git_branch)\[\033[00m\] | \$(~/bin/last-commit)\n\$> "
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+    PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w$(parse_git_branch) \n\$> " # | \$(~/bin/last-commit)
 fi
 unset color_prompt force_color_prompt
 
@@ -88,15 +92,32 @@ fi
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
+
 alias ll='ls -alF'
 alias la='ls -A'
-alias l='ls -CF'
 
-alias status="git status"
-alias push="git push origin $(git rev-parse --abbrev-ref HEAD)"
-alias diff="git diff"
-alias add="git add -A"
-alias commit="git commit -m"
+alias be='bundle exec'
+
+alias diff='git diff'
+alias status='git status'
+alias add='git add -A'
+alias commit='git commit -m'
+alias branch='git branch'
+alias co='git checkout'
+alias push='git push origin $(git symbolic-ref --short HEAD)'
+
+alias overmind='~/bin/overmind'
+alias fd='fdfind'
+alias tests='/home/matty/workspace/python-vim-plugin/env/bin/python /home/matty/workspace/python-vim-plugin/start_everything.py'
+alias tree='tree -I "env|__pycache__|vendor"'
+alias stop_spring="kill $(ps -afe | grep spring | awk '{ print $2 }')"
+alias stop_jobs="kill $(jobs -p)"
+
+
+alias nails="RAILS_HOST=\"$(curl localhost:4040/api/tunnels | jq  '.tunnels[0].public_url' -r | sed 's/^https:\/\///')\" && echo 'RAILS_HOST=$RAILS_HOST' && be rails s"
+
+#export FZF_DEFAULT_COMMAND='fd --type f'
+
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -122,18 +143,13 @@ if ! shopt -oq posix; then
   fi
 fi
 
-function _update_ps1() {
-    PS1=$(powerline-shell $?)
-}
+eval "$(rbenv init -)"
 
-if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
-    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
-fi
+export PATH="$HOME/.nodenv/bin:$PATH"
 
+eval "$(nodenv init -)"
 
-
-
-For posterity: I used @MS_'s solution but ran into the problem where cding directly from one project to another deactivates the old virtualenv but doesn't activate the new one. This is a slightly modified version of that solution which solves this problem:
+#export PS1="[\$(date +%k:%M:%S)] \u | \w$ "
 
 # auto activate virtualenv
 # Modified solution based on https://stackoverflow.com/questions/45216663/how-to-automatically-activate-virtualenvs-when-cding-into-a-directory/56309561#56309561
@@ -145,7 +161,7 @@ function cd() {
 
   ## If env folder is found then activate the vitualenv
   function activate_venv() {
-    if [[ -f "${DEFAULT_ENV_PATH}/bin/activate" ]] ; then 
+    if [[ -f "${DEFAULT_ENV_PATH}/bin/activate" ]] ; then
       source "${DEFAULT_ENV_PATH}/bin/activate"
     fi
   }
@@ -164,17 +180,7 @@ function cd() {
   fi
 }
 
-PATH=$PATH:$HOME/bin
-export PATH
-
 function project(){
-	~/.bin/project/env/bin/python ~/.bin/project/main.py $@;
+	~/workspace/project-cmd/env/bin/python ~/workspace/project-cmd/project/main.py $@;
 	[ "$1" != 'list' ] && cd "/home/matty/workspace/$1"
 }
-
-alias tmux="env TERM=xterm-256color tmux"
-alias run-flask="export FLASK_APP=hello.py flask run"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
