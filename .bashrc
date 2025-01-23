@@ -60,10 +60,20 @@ parse_git_branch() {
 }
 export PS1="\u@\h \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
 
-if [ "$color_prompt" = yes ]; then
-    PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\[\033[33m\]\$(parse_git_branch)\[\033[00m\] | \$(~/bin/last-commit)\n󱞪 "
-else
-    PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w$(parse_git_branch) \n\$> " # | \$(~/bin/last-commit)
+if [[ "${script_shell}" == "zsh" ]]
+    NEWLINE=$'\n'
+    setopt PROMPT_SUBST
+    GITBRANCH='$(parse_git_branch)'
+    PS1="%F{green}%n%f@%F{blue}%m%f %~ %F{yellow}${GITBRANCH}${NEWLINE}%f󱞪 " #"| \$(~/bin/last-commit)\n󱞪 "
+then
+
+elif [ "${script_shell}" == "bash" ]; then
+
+  if [ "$color_prompt" = yes ]; then
+      PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\[\033[33m\]\$(parse_git_branch)\[\033[00m\] | \$(~/bin/last-commit)\n󱞪 "
+  else
+      PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w$(parse_git_branch) \n\$> " # | \$(~/bin/last-commit)
+  fi
 fi
 unset color_prompt force_color_prompt
 
