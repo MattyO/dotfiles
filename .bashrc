@@ -1,6 +1,6 @@
-# ~/.bashrc: executed by bash(1) for non-login shells.  # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
-
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
@@ -10,6 +10,21 @@ esac
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
+HISTTIMEFORMAT="%Y-%m-%dT%H:%M:%S "
+
+#command_exe_time () {
+#    echo "debug";
+#    local end=$(TZ=UTC date "+%s");
+#    echo "$end";
+#    local start=$(history 1 | awk '{print $2}');
+#    local start_time=$(date -d "$start" "+%s");
+#    echo "$start";
+#    echo "$start_time";
+#    echo "$diff";
+#    echo "end debug";
+#    local diff=$((end - start_time));
+#    echo "$diff"
+#}
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -29,7 +44,7 @@ shopt -s checkwinsize
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# set variable identifying the chroot you work in (used in the prompt below)
+#trap 'echo $BASH_COMMAND' DEBUG  # example only set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
@@ -42,39 +57,97 @@ esac
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-#force_color_prompt=yes
+force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-    # We have color support; assume it's compliant with Ecma-48
-    # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-    # a case would tend to support setf rather than setaf.)
-    color_prompt=yes
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
     else
-    color_prompt=
+	color_prompt=
     fi
 fi
 
+
 parse_git_branch() {
-     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
 }
-export PS1="\u@\h \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
+export PS1="\u@\h \[\033[32m\]\w\[\033[33m\]\\[\033[00m\] $ "
 
-if [[ "${script_shell}" == "zsh" ]]
-    NEWLINE=$'\n'
-    setopt PROMPT_SUBST
-    GITBRANCH='$(parse_git_branch)'
-    PS1="%F{green}%n%f@%F{blue}%m%f %~ %F{yellow}${GITBRANCH}${NEWLINE}%f󱞪 " #"| \$(~/bin/last-commit)\n󱞪 "
-then
 
-elif [ "${script_shell}" == "bash" ]; then
+#counter=0
+#PROMPT_COMMAND='counter=$((counter+1))'
 
-  if [ "$color_prompt" = yes ]; then
-      PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\[\033[33m\]\$(parse_git_branch)\[\033[00m\] | \$(~/bin/last-commit)\n󱞪 "
-  else
-      PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w$(parse_git_branch) \n\$> " # | \$(~/bin/last-commit)
+ps1 () {
+  red=\[\033[91m\]          # color 1 Red
+  GIT="\[\033[32m\]"        # color 2  (#26A98B) - Green
+  YELLOW="\[\033[33m\]"        # color 3  (#EDB54B) - Yellow
+  USER="\[\033[34m\]"       # color 4  (#195465) - Blue
+  HOST="\[\033[34m\]"       # color 4  (#195465) - Blue
+  PURPLE="\[\033[35m\]"     # color 5  (#4E5165) - Magenta
+  DIR="\[\033[36m\]"        # color 6  (#33859D) - Cyan
+  PROMPT="\[\033[97m\]"     # color 7  (#98D1CE) - Brightest
+  TS="\[\033[90m\]"         # color 8 - Dark gray
+  ENV_CONTEXT="\[\033[91m\]"       # color 9  (#D26939) - Bright orange
+  TS="\[\033[90m\]"         # color 13 (#888BA5) - Gray
+  HR="\[\033[94m\]"         # color 12 (#093748) - Dark blue
+  RESET="\[\033[00m\]"
+
+  asdf_versions="$(asdf current 2>/dev/null | while read -r line; do
+      if [[ -n $line ]]; then
+          lang=$(echo "$line" | awk '{print $1}')
+          version=$(echo "$line" | awk '{print $2}')
+
+        # Skip if version doesn't match semantic versioning pattern
+        [[ ! $version =~ ^[0-9]+(\.[0-9]+)*$ ]] && continue
+        [[ $version == "______" ]] && continue
+
+          case $lang in
+              "ruby")       lang="" ;;
+              "go")         lang="" ;;
+              "python")     lang="" ;;
+              "npm")        lang="" ;;
+              "nodejs")     lang="󰎙" ;;
+              "terraform")  lang="" ;;
+          esac
+          printf "%s:%s " "$lang" "$version"
+      fi
+  done)"
+  if [ -n "$last_command_start" ]; then
+      current_time="$(date "+%s%N")";
+      diff_time="$(( ($current_time-$last_command_start) /100000 ))";
+      padded_diff_time=$(printf "%05d" "$diff_time")
+      time_output="[${padded_diff_time:0:1}.${padded_diff_time:1} sec]"
+
+      local execution_time_line="\n$HR┗$(printf -- ━%.s $(seq -s ' ' $(($COLUMNS-${#time_output}-5))))$RESET$PURPLE$time_output$RESET$HR━━━┛$RESET\n\n\n"
+
   fi
+
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+      git_info="($(parse_git_branch) ⧗ $(~/bin/last-commit)) "
+  fi
+
+  host_info="⌜$(whoami)@$(hostname)⌟"
+  directory_info="📁 ${PWD/#$HOME/\~}"
+
+#${debian_chroot:+($debian_chroot)}
+
+   primary_line="$HR┍━$RESET $USER$host_info$RESET $YELLOW$directory_info$RESET $GIT$git_info$RESET$HR┆ $RESET$ENV_CONTEXT$asdf_versions$RESET"
+
+   primary_padded_line="$primary_line$HR$(printf -- ━%.s $(seq -s ' ' $(($COLUMNS-${#primary_line}+ 129))))$RESET$PURPLE[\t]$RESET$HR━━━┓$RESET"
+
+   echo "$execution_time_line$primary_padded_line\n 󱞪 "
+
+}
+
+if [ "$color_prompt" = yes ]; then
+    PS1="$(ps1)"
+else
+    PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w$(parse_git_branch) \n\$> " # | \$(~/bin/last-commit)
 fi
+
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
@@ -102,9 +175,9 @@ fi
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
-
 alias ll='ls -alF'
 alias la='ls -A'
+alias l='ls -CF'
 
 alias be='bundle exec'
 
@@ -122,15 +195,9 @@ alias tests='/home/matty/workspace/python-vim-plugin/env/bin/python /home/matty/
 alias tree='tree -I "env|__pycache__|vendor"'
 alias stop_spring="kill $(ps -afe | grep spring | awk '{ print $2 }')"
 alias stop_jobs="kill $(jobs -p)"
-
-
-alias nails="RAILS_HOST=\"$(curl localhost:4040/api/tunnels | jq  '.tunnels[0].public_url' -r | sed 's/^https:\/\///')\" && echo 'RAILS_HOST=$RAILS_HOST' && be rails s"
-
-#export FZF_DEFAULT_COMMAND='fd --type f'
-
-
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
+
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # Alias definitions.
@@ -153,16 +220,6 @@ if ! shopt -oq posix; then
   fi
 fi
 
-eval "$(rbenv init -)"
-
-export PATH="$HOME/.nodenv/bin:$PATH"
-
-eval "$(nodenv init -)"
-
-#export PS1="[\$(date +%k:%M:%S)] \u | \w$ "
-
-# auto activate virtualenv
-# Modified solution based on https://stackoverflow.com/questions/45216663/how-to-automatically-activate-virtualenvs-when-cding-into-a-directory/56309561#56309561
 function cd() {
   builtin cd "$@"
 
@@ -194,3 +251,19 @@ function project(){
 	~/workspace/project-cmd/env/bin/python ~/workspace/project-cmd/project/main.py $@;
 	[ "$1" != 'list' ] && cd "/home/matty/workspace/$1"
 }
+
+# Added by `rbenv init` on Tue Jul  9 05:48:11 PM EDT 2024
+eval "$(~/.rbenv/bin/rbenv init - --no-rehash bash)"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+. "$HOME/.asdf/asdf.sh"
+
+export PGHOST=localhost
+export PGUSER=postgres
+export EDITOR=vim
+
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+preexec() { last_command_start="$(date "+%s%N")";}
+precmd() { PS1="$(ps1)" ;}
+
