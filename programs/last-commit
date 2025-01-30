@@ -1,15 +1,17 @@
-#!/home/matty/workspace/dotfiles/programs/env/bin/python
+#![find a way to substitute home dir]/bin/last-commit/env/bin/python
 
 import datetime
 import arrow
-from pathlib import Path
+from pathlib import Path, PurePath
+import os.path
 
-if not Path("/home/matty/.last-git-commit").is_file():
+filename = str(PurePath(os.path.expanduser("~"), Path(".last-git-commit")))
+if not Path(filename).is_file():
     print("NA")
     exit()
 
 
-with open("/home/matty/.last-git-commit", 'r') as f:
+with open(filename, 'r') as f:
     last_commit_string = f.read().strip()
     print(arrow.get(last_commit_string).humanize())
 
