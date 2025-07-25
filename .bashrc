@@ -7,6 +7,7 @@ case $- in
       *) return;;
 esac
 
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
@@ -74,6 +75,7 @@ fi
 parse_git_branch() {
      git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
 }
+
 export PS1="\u@\h \[\033[32m\]\w\[\033[33m\]\\[\033[00m\] $ "
 
 
@@ -95,7 +97,7 @@ ps1 () {
   HR="\[\033[94m\]"         # color 12 (#093748) - Dark blue
   RESET="\[\033[00m\]"
 
-  asdf_versions="$(asdf current 2>/dev/null | while read -r line; do
+  env_versions="$(asdf current 2>/dev/null | while read -r line; do
       if [[ -n $line ]]; then
           lang=$(echo "$line" | awk '{print $1}')
           version=$(echo "$line" | awk '{print $2}')
@@ -115,6 +117,13 @@ ps1 () {
           printf "%s:%s " "$lang" "$version"
       fi
   done)"
+
+  env_versions="$(if [[ -n "$VIRTUAL_ENV" ]] ; then
+      lang="($(basename "$VIRTUAL_ENV" )) ";
+      version="$( python --version | grep -oE "[0-9]+\.[0-9]+\.?[0-9]*")"
+      printf "%s:%s " "$lang" "$version"
+  fi)"
+
   if [ -n "$last_command_start" ]; then
       current_time="$(date "+%s%N")";
       diff_time="$(( ($current_time-$last_command_start) /100000 ))";
@@ -125,16 +134,16 @@ ps1 () {
 
   fi
 
-  if git rev-parse --git-dir > /dev/null 2>&1; then
-      git_info="($(parse_git_branch) ⧗ $(~/bin/last-commit)) "
-  fi
+  #"if git rev-parse --git-dir > /dev/null 2>&1; then
+  #"    git_info="($(parse_git_branch) ⧗ $(~/bin/last-commit)) "
+  #"fi
 
   host_info="⌜$(whoami)@$(hostname)⌟"
   directory_info="📁 ${PWD/#$HOME/\~}"
 
 #${debian_chroot:+($debian_chroot)}
 
-   primary_line="$HR┍━$RESET $USER$host_info$RESET $YELLOW$directory_info$RESET $GIT$git_info$RESET$HR┆ $RESET$ENV_CONTEXT$asdf_versions$RESET"
+   primary_line="$HR┍━$RESET $USER$host_info$RESET $YELLOW$directory_info$RESET $GIT$git_info$RESET$HR┆ $RESET$ENV_CONTEXT$env_versions$RESET"
 
    primary_padded_line="$primary_line$HR$(printf -- ━%.s $(seq -s ' ' $(($COLUMNS-${#primary_line}+ 129))))$RESET$PURPLE[\t]$RESET$HR━━━┓$RESET"
 
@@ -147,6 +156,7 @@ if [ "$color_prompt" = yes ]; then
 else
     PS1="${debian_chroot:+($debian_chroot)}\u@\h:\w$(parse_git_branch) \n\$> " # | \$(~/bin/last-commit)
 fi
+
 
 unset color_prompt force_color_prompt
 
@@ -197,6 +207,9 @@ alias stop_spring="kill $(ps -afe | grep spring | awk '{ print $2 }')"
 alias stop_jobs="kill $(jobs -p)"
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
+#
+alias jtest='just test'
+alias jinstall='just install'
 
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
@@ -205,7 +218,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
-if [ -f ~/.bash_aliases ]; then
+if [ -f ~/.bash_aliases ] && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     . ~/.bash_aliases
 fi
 
@@ -219,6 +232,7 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
 
 function cd() {
   builtin cd "$@"
@@ -266,4 +280,18 @@ export EDITOR=vim
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 preexec() { last_command_start="$(date "+%s%N")";}
 precmd() { PS1="$(ps1)" ;}
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+. "$HOME/.cargo/env"
+
+
+echo "      ___       __   __         ___     __        __            /
+|  | |__  |    /  \` /  \\  |\\/| |__     |__)  /\\  /  \` |__/     /
+|/\\| |___ |___ \\__, \\__/  |  | |___    |__) /~~\\ \\__, |  \\    .
+-------------------------------------------------------"
+echo "$(whoami) last logged in $( lastlog -u $USER | awk 'NR==2 {print $3, $4, $5, $6, $7, $8}'| xargs -I {} date -d "{}" "+%B %d, %Y at %I:%M:%S %p")"
+echo ""
 
