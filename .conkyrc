@@ -1,0 +1,150 @@
+-- Conky, a system monitor https://github.com/brndnmtthws/conky --
+-- This configuration file is Lua code. You can write code in here, and it will
+-- execute when Conky loads. You can use it to generate your own advanced
+-- configurations.
+--
+-- Try this (remove the `--`):
+--
+--   print("Loading Conky config")
+--
+-- For more on Lua, see:
+-- https://www.lua.org/pil/contents.html
+
+
+
+conky.config = {
+    alignment = 'top_right',
+    background = true,
+    border_width = 1,
+    cpu_avg_samples = 2,
+    default_color = '#195466',
+    default_outline_color = 'white',
+    default_shade_color = 'white',
+    double_buffer = true,
+    draw_borders = false,
+    draw_graph_borders = true,
+    draw_outline = false,
+    draw_shades = true,
+    extra_newline = false,
+    font = 'Verdana Sans Mono:size=12',
+    gap_x = 60,
+    gap_y = 60,
+    minimum_height = 5,
+    minimum_width = 5,
+    net_avg_samples = 2,
+    no_buffers = true,
+    out_to_console = false,
+    out_to_ncurses = false,
+    out_to_stderr = false,
+    out_to_x = true,
+
+    own_window = true,
+    own_window_class = 'Conky',
+    own_window_type = 'override',
+    -- own_window_type = 'dock',
+    --  own_window_type = 'panel',
+     -- own_window_hints='above',
+    -- own_window_one_global = true,
+-- own_window_type = 'normal',
+-- own_window_hints = 'undecorated,sticky,below,skip_taskbar,skip_pager',
+
+    show_graph_range = false,
+    show_graph_scale = false,
+    stippled_borders = 0,
+    update_interval = 1.0,
+    uppercase = false,
+    use_spacer = 'none',
+    use_xft = true,
+
+    own_window=true,
+    -- own_window_type='desktop',
+    own_window_argb_visual=true,
+    -- own_window_transparent = true,
+    own_window_argb_value=150,
+
+    minimum_height = 1000,						-- minimum height of window
+	minimum_width = 500,						-- minimum width of window
+	maximum_width = 500,
+
+    border_inner_margin = 10, 					-- margin between border and text
+	border_outer_margin = 10, 					-- margin between border and edge of window
+	border_width = 0, 							-- border width in pixels
+	default_bar_width = 0,					    -- default is 0 - full width
+	default_bar_height = 25,					-- default is 6
+	default_gauge_height = 25,					-- default is 25
+	default_gauge_width = 0,					-- default is 40
+	default_graph_height = 40,					-- default is 25
+	default_graph_width = 0,					-- default is 0 - full width
+	draw_borders = false,						-- draw borders around text
+	draw_graph_borders = false,					-- draw borders around graphs
+	draw_shades = false,						-- draw shades
+	draw_outline = false,						-- draw outline
+	stippled_borders = 0,						-- dashing the border
+color0='FCD862',
+color1='99d1ce',
+color2='99d1ce'
+
+
+
+     -- lua_load="./graph.lua",
+     -- lua_draw_hook_pre="main_graph",
+
+}
+
+
+conky.text = [[
+${color2}${font Roboto:size=60}${alignc}${time %I}:${time %M}${font Roboto:size=50}${time %p}${font}$color
+${font Roboto:size=22}${alignc}${time %A} ${time %B} ${time %e}, ${time %Y}${font}
+${color2}${font Roboto:size=17}System   ${hr 2}${font}${color}
+
+Uptime: $uptime${tab 100}Memory: $memmax
+
+Swap: $swapmax${tab 100}Disk: ${fs_size /}
+
+${color2}${font Roboto:size=17}Compute ${hr 2}${font}$color
+
+CPU: $cpu% ${cpubar 4}
+${cpugraph}
+Load: ${loadavg 1}
+$loadgraph
+Processes: $processes  Running: $running_processes
+
+Name${tab 100}PID${tab 100}CPU%${tab 100}MEM%
+${top name 1}${tab 100}${top pid 1}${tab 100}${top cpu 1}${tab 100}${top mem 1}
+${top name 2}${tab 100}${top pid 2}${tab 100}${top cpu 2}${tab 100}${top mem 2}
+${top name 3}${tab 100}${top pid 3}${tab 100}${top cpu 3}${tab 100}${top mem 3}
+${top name 4}${tab 100}${top pid 4}${tab 100}${top cpu 4}${tab 100}${top mem 4}
+
+${color2}${font Roboto:size=17}Memory ${hr 2}${font}$color
+
+RAM$color $mem
+$memperc%${tab 20}${membar 4}
+
+Swap$color $swap
+$swapperc%${tab 20}${swapbar 4}
+
+${color2}${font Verdana:size=17}Network ${hr 2}${font}$color
+
+IP: ${color grey}$color${addrs wlp0s20f3}
+${wireless_link_qual_perc wlp0s20f3}% ${wireless_link_bar 4 wlp0s20f3}
+
+Down:$color ${downspeed wlp0s20f3}
+${downspeedgraph wlp0s20f3}
+Up:$color ${upspeed wlp0s20f3}
+${upspeedgraph wlp0s20f3}
+
+${color2}${font Verdana:size=17}Disk ${hr 2}${font}$color
+
+${fs_used /} / ${fs_size /} ${fs_bar 6 /}
+
+Read: ${diskio_read}
+${diskiograph_read}
+Write: ${diskio_write}
+${diskiograph_write}
+${color2}${font Verdana:size=17}Power${hr 2}${font}$color
+
+${battery} - ${battery_time}
+${battery_bar 6}
+
+
+]]
