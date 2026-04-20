@@ -1,0 +1,15 @@
+[
+    {
+        "file": ".vimrc",
+        "destination": "~/.vimrc"
+    },
+    {
+        "file": ".bashrc",
+        "destination": "~/.bashrc"
+    },
+    {
+        "file": ".bash_profile",
+        "destination": "~/.bash_profile"
+    }
+
+]
