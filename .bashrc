@@ -126,9 +126,10 @@ ps1 () {
 
   if [ -n "$last_command_start" ]; then
       current_time="$(date "+%s%N")";
-      diff_time="$(( ($current_time-$last_command_start) /100000 ))";
-      padded_diff_time=$(printf "%05d" "$diff_time")
-      time_output="[${padded_diff_time:0:1}.${padded_diff_time:1} sec]"
+      diff_time_milli="$(( ($current_time-$last_command_start) / 1000000))";
+
+      time_output_milli=$(printf "%03d" "$((diff_time_milli % 1000))")
+      time_output="[$((diff_time_milli / 1000)).${time_output_milli} sec]"
 
       local execution_time_line="\n$HR┗$(printf -- ━%.s $(seq -s ' ' $(($COLUMNS-${#time_output}-5))))$RESET$PURPLE$time_output$RESET$HR━━━┛$RESET\n\n\n"
 
